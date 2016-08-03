@@ -1,0 +1,53 @@
+<% include header %>
+
+<div id="container"></div>
+<script src="sigma.min.js"></script>
+<script src="sigma.parsers.json.min.js"></script>
+<script>
+    // Let's first initialize sigma:
+    var s = new sigma('container');
+	
+	s.graph.addNode({
+      // Main attributes:
+      id: '<%= artist %>',
+      label: '<%= artist %>',
+      // Display attributes:
+      x: 0.5,
+      y: 0.5,
+      size: 3,
+      color: '#00f'
+    });
+	
+	var i = 0;
+
+	<% similarArtistsList.forEach(function(item, i){ %>
+    // Then, let's add some data to display:
+	
+		s.graph.addNode({
+		  // Main attributes:
+		  id: '<%= item.name %>',
+		  label: '<%= item.name %>',
+		  // Display attributes:
+
+			x: Math.random(),
+			y: Math.random(),
+		  size: 2,
+		  color: '#f00'
+		});
+		
+		s.graph.addEdge({
+			id: '<%= item.name %>',
+		  // Reference extremities:
+		  source: '<%= artist %>',
+		  target: '<%= item.name %>'
+		});
+		
+		i += 0.1;
+		
+	<% }) %>
+
+    // Finally, let's ask our sigma instance to refresh:
+    s.refresh();
+  </script>
+
+<% include footer %>

@@ -1,0 +1,29 @@
+<% include header %>
+
+<h1><%= artist %>:</h1>
+Listener: <%= artistListeners %>
+<br>
+Play count: <%= artistPlayCount %>
+<br>
+
+<img src="<%= artistImage %>" >
+
+<br>
+<br>
+
+Kereses:
+<form method = "post">
+	<input type="text" name="artistid" id="artistid" size="40"><br>
+	<input type="submit" id="submit" formmethod="post" value="Submit">
+</form>
+<br>
+
+<ul>
+    <% similarArtistsList.forEach(function(item){ %>
+    <li><a href="/artist/<%= item.name %>"><%= item.name %></a> link: <%= item.url %> </li>
+    <% }) %>
+</ul>
+
+<br>
+
+<% include footer %>
