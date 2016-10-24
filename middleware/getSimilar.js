@@ -77,9 +77,16 @@ module.exports = function () {
 
       goDeep(function () {
         //ez itt a ki kihez lista
-        console.log(hasonlolista);
+        //console.log(hasonlolista);
 
-        res.tpl.similarArtistsList = [];
+        res.tpl.similarArtistsList = hasonlolista;
+
+        //console.log(res.tpl.similarArtistsList);
+/*
+        for (var item in hasonlolista) {
+          console.log(item);
+        }
+*/
 
         return next();
       });
