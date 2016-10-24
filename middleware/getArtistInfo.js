@@ -33,7 +33,7 @@ module.exports = function () {
 			res.tpl.artist = artist.name;
 			
 
-           // console.log(artist);
+            //console.log(artist);
 
             return next();
         });

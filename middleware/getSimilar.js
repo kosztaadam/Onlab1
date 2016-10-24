@@ -1,53 +1,88 @@
 module.exports = function () {
 
-    /**
-     * A hasonlo eloadok lekerese
-     * Az artist paramterbol jon
-     */
+  /**
+   * A hasonlo eloadok lekerese
+   * Az artist paramterbol jon
+   */
 
-    return function (req, res, next) {
+  return function (req, res, next) {
+    if (typeof res.tpl.artistInfo == 'undefined') {
+        console.log("error");
+        return next();
+      }
 
-        var similarArtistsList = [];
-        var artistName;
+      var lfm = res.tpl.lfm;
 
-        if (res.tpl.similarArtistsList == null) {
-            artistName = res.tpl.artist;
+      var mit = [];
+      var nextmit = [];
+      var deep = 3;
+      var alreadyProcessedNames = [];
+      var hasonlolista = [];
+
+      mit.push(res.tpl.artistInfo);
+
+      function getNextItem(finalcb) {
+        var most = null;
+
+        if (mit.length > 0) {
+          most = mit.pop();
+        } else {
+          return finalcb();
         }
-        else {
-            artistName = res.tpl.list[0][res.tpl.i].name;
-            res.tpl.i++;
+
+        console.log("most: " + most.name);
+
+        if (alreadyProcessedNames.indexOf(most.name) != -1) {
+          setTimeout(function () {
+            getNextItem(finalcb);
+          }, 0);
+          return;
         }
 
-        res.tpl.artistList.push(artistName);
-        console.log(res.tpl.artistList)
-
-        lfm = res.tpl.lfm;
+        alreadyProcessedNames.push(most.name);
 
         lfm.artist.getSimilar({
-                'artist': artistName,
-                'limit': '5'
+            'artist': most.name,
+            'limit': '2'
 
-        }, function (err, similarArtists) {
-                if (err) {
-                    return console.log('We\'re in trouble', err);
-                }
+          }, function (err, similarArtists) {
+            if (err) {
+              return console.log('We\'re in trouble', err);
+            }
 
-                /**
-                 * Console-ra kiirja a neveket
-                 */
+            hasonlolista[most.name] = [];
+            similarArtists.artist.forEach(function (item) {
+              nextmit.push(item);
+              hasonlolista[most.name].push(item.name);
+            });
 
-                similarArtistsList = similarArtists.artist;
+            return getNextItem(finalcb);
+          }
+        );
+      }
 
-                res.tpl.similarArtistsList = similarArtistsList;
-                res.tpl.similarArtistsListLength = similarArtistsList.length;
+      function goDeep(cb) {
+        getNextItem(function () {
+          console.log("deep: " + deep);
+          if (deep > 0) {
+            deep--;
+            mit = nextmit;
+            nextmit = [];
+            return goDeep(cb);
+          } else {
+            return cb();
+          }
+        })
+      }
 
-                res.tpl.list.push(similarArtistsList);
+      goDeep(function () {
+        //ez itt a ki kihez lista
+        console.log(hasonlolista);
 
-                console.log("----");
+        res.tpl.similarArtistsList = [];
 
-                return next();
-        });
-
+        return next();
+      });
     };
 
-};
+  };

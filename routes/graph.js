@@ -21,14 +21,9 @@ module.exports = function(app) {
     app.get('/graph',
         authMW(),
         getParametersMW(),
-        getArtistInfoMW(),
+		getArtistInfoMW(),
         getTopAlbumMW(),
         getTopTracksMW(),
-        getSimilarMW(),
-        getSimilarMW(),
-        getSimilarMW(),
-        getSimilarMW(),
-        getSimilarMW(),
         getSimilarMW(),
         renderMW('graph')
     );

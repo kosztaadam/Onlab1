@@ -17,13 +17,13 @@
                             <li><b>Play count:</b> <%= artistPlayCount %></li>
                             <li><b>Top tracks:</b></li>
                             <ul>
-                                <% artistTopTracks.forEach(function(item){ %>
-                                    <li><%= item.name %></li>
-                                <% }) %>
+                                <% //artistTopTracks.forEach(function(item){ %>
+                                <li><% //item.name %></li>
+                                <% //}) %>
                             </ul>
                             <li><b>Similar artists:</b></li>
                             <ul>
-                                <% list[0].forEach(function(item){ %>
+                                <% list.forEach(function(item){ %>
                                 <li><a href="/graph/<%= item.name %>"><%= item.name %></a></li>
                                 <% }) %>
                             </ul>
@@ -53,7 +53,7 @@
                 .nodes(nodes)
                 .links(links)
                 .charge(-120)
-                //.linkDistance(20)
+                .linkDistance(80)
                 .size([width, height])
                 .on("tick", tick);
 
@@ -64,8 +64,8 @@
         var node = svg.selectAll(".node"),
                 link = svg.selectAll(".link");
 
-        <% for(var i = 0; i < 6; i++) {%>
-        var defaultartist = {id: '<%= artistList[i] %>', name:'<%= artistList[i] %>', type:'2'};
+        <% for(var i = 0; i < 3; i++) {%>
+        var defaultartist = {id: '<%= artist %>', name:'<%= artist %>', type:'2'};
         var end = false;
         var tempnode;
 
@@ -92,7 +92,7 @@
 
         //links.push({source: n, target: a});
 
-        <% list[i].forEach(function(item){ %>
+        <% list.forEach(function(item){ %>
         var a = {id: '<%= item.name %>', name: '<%= item.name %>',type:'3'};
         var end2 = false;
         var temp2;
