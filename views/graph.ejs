@@ -22,11 +22,6 @@
                                 <% }) %>
                             </ul>
                             <li><b>Similar artists:</b></li>
-                            <ul>
-                                <% for(var item in similarArtistsList) { %>
-                                <li><a href="/graph/<%= item %>"><%= item %></a></li>
-                                <% } %>
-                            </ul>
                         </ul>
                     </td>
                     <td>
@@ -41,125 +36,102 @@
         <h2>Similar artists graph</h2>
     </div>
 
+    <style>
+
+        .links line {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+
+        .nodes circle {
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+
+    </style>
+    <svg width="960" height="960"></svg>
+
     <script>
-        var width = 960, height = 380;
 
-        var color = d3.scale.category10();
+        var simart = <%- JSON.stringify(similarArtistsList) %>;
 
-        var nodes = [];
-        var links = [];
+        var svg = d3.select("svg"),
+                width = +svg.attr("width"),
+                height = +svg.attr("height");
 
-        var force = d3.layout.force()
-                .nodes(nodes)
-                .links(links)
-                .charge(-120)
-                .linkDistance(80)
-                .size([width, height])
-                .on("tick", tick);
+        var color = d3.scaleOrdinal(d3.schemeCategory20);
 
-        var svg = d3.select("body").append("svg")
-                .attr("width", width)
-                .attr("height", height);
+        var simulation = d3.forceSimulation()
+                .force("link", d3.forceLink().id(function(d) { return d.id; }))
+                .force("charge", d3.forceManyBody())
+                .force("center", d3.forceCenter(width / 2, height / 2));
 
-        var node = svg.selectAll(".node"),
-                link = svg.selectAll(".link");
+        //d3.json(simart, function(error, graph) {
+          //  if (error) throw error;
 
-        <% for(var i = 0; i < 2; i++) {%>
-        var defaultartist = {id: '<%= artist %>', name:'<%= artist %>', type:'2'};
-        var end = false;
-        var tempnode;
+            graph = JSON.parse(simart);
 
-        if(nodes.length > 0) {
-            nodes.forEach(function (n) {
-                if (defaultartist.id == n.id) {
-                    tempnode = n;
-                    end = true;
-                }
-            });
-            if(end == true) {
-                defaultartist = tempnode;
-                defaultartist.type = '2';
-            }
-            else {
-                nodes.push(defaultartist);
-            }
-        }
-        else {
-            nodes.push(defaultartist);
-            defaultartist.type = '1';
-        }
+            var link = svg.append("g")
+                    .attr("class", "links")
+                    .selectAll("line")
+                    .data(graph.links)
+                    .enter().append("line")
+                    .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
-
-        //links.push({source: n, target: a});
-        <% for(var item in similarArtistsList) { %>
-        var a = {id: '<%= item %>', name: '<%= item %>',type:'3'};
-        var end2 = false;
-        var temp2;
-
-        nodes.forEach(function (n) {
-            if (a.id == n.id) {
-                end2 = true;
-                temp2 = n;
-            }
-        });
-        if(end2 == true) {
-            a = temp2;
-        }
-        else {
-            nodes.push(a);
-        }
-
-        links.push({source: defaultartist, target: a});
-        <% } %>
-        <% } %>
-
-        start();
-        /*
-         // 1. Add three nodes and three links.
-         setInterval(function() {
-         var a = {id: "a"+Math.random(),uid:Math.floor(Math.random()*20)};
-
-         nodes.push(a);
-         if (nodes.length>0){
-         links.push({source: a, target: nodes[Math.floor(Math.random()*nodes.length)]});
-         }
-         start();
-         }, 100);
-         */
-        function start() {
-            link = link.data(force.links(), function(d) { return d.source.id + "-" + d.target.id; });
-            link.enter().insert("line", ".node").attr("class", "link");
-            link.exit().remove();
-
-            node = node.data(force.nodes(), function(d) { return d.id;});
-            node.enter()
-                    .append("circle").attr("class", function(d) { return "node " + d.id; })
-                    .attr("r", 10)
-                    .style("fill", function(d){
-                        return color(d.type);
-                    })
-                    .call(force.drag);
-            // .on("click", function(d){alert(d.uid);});
-            node.exit().remove()
+            var node = svg.append("g")
+                    .attr("class", "nodes")
+                    .selectAll("circle")
+                    .data(graph.nodes)
+                    .enter().append("circle")
+                    .attr("r", 5)
+                    .attr("fill", function(d) { return color(d.group); })
+                    .call(d3.drag()
+                            .on("start", dragstarted)
+                            .on("drag", dragged)
+                            .on("end", dragended));
 
             node.append("title")
-                    .text(function(d) { return d.name; });
+                    .text(function(d) { return d.id; });
 
-            force.start();
+            simulation
+                    .nodes(graph.nodes)
+                    .on("tick", ticked);
+
+            simulation.force("link")
+                    .links(graph.links);
+
+            function ticked() {
+                link
+                        .attr("x1", function(d) { return d.source.x; })
+                        .attr("y1", function(d) { return d.source.y; })
+                        .attr("x2", function(d) { return d.target.x; })
+                        .attr("y2", function(d) { return d.target.y; });
+
+                node
+                        .attr("cx", function(d) { return d.x; })
+                        .attr("cy", function(d) { return d.y; });
+            }
+        //});
+
+        function dragstarted(d) {
+            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
         }
 
-        function tick() {
-            node.attr("cx", function(d) { return d.x; })
-                    .attr("cy", function(d) { return d.y; })
-
-            link.attr("x1", function(d) { return d.source.x; })
-                    .attr("y1", function(d) { return d.source.y; })
-                    .attr("x2", function(d) { return d.target.x; })
-                    .attr("y2", function(d) { return d.target.y; });
+        function dragged(d) {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
         }
 
+        function dragended(d) {
+            if (!d3.event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
 
     </script>
+
 
 </div>
 

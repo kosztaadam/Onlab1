@@ -43,11 +43,6 @@ module.exports = function(app) {
         getTopAlbumMW(),
         getTopTracksMW(),
         getSimilarMW(),
-        getSimilarMW(),
-        getSimilarMW(),
-        getSimilarMW(),
-        getSimilarMW(),
-        getSimilarMW(),
         renderMW('graph')
     );
 
