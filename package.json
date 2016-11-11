@@ -13,6 +13,7 @@
     "body-parser": "^1.15.0",
     "ejs": "^2.4.1",
     "express": "^4.13.4",
-    "lastfmapi": "^0.1.1"
+    "lastfmapi": "^0.1.1",
+    "node-cache": "^4.1.0"
   }
 }

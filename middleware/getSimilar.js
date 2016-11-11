@@ -17,11 +17,11 @@ module.exports = function () {
 
         var mit = [];
         var nextmit = [];
-        var deep = 1;
+        var deep = 2;
         var alreadyProcessedNames = [];
         var hasonlolista = [];
         var group = 0;
-        var limit = 3;
+        var limit = 5;
 
         mit.push(res.tpl.artistInfo);
 
@@ -45,33 +45,66 @@ module.exports = function () {
 
             alreadyProcessedNames.push(most.name);
 
-            lfm.artist.getSimilar({
-                'artist': most.name,
-                'limit': limit
+            var path = './cache/' + most.name + '_' + limit + '.json';
 
-            }, function (err, similarArtists) {
-                if (err) {
-                    return console.log('We\'re in trouble', err);
-                }
+            try {
+                fs.accessSync(path, fs.F_OK);
 
-                hasonlolista[most.name] = {};
-                hasonlolista[most.name].similarArtist = [];
-                hasonlolista[most.name].group = group;
-                similarArtists.artist.forEach(function (item) {
-                    nextmit.push(item);
-                    hasonlolista[most.name].similarArtist.push(item.name);
+                console.log("cache: " + most.name);
+
+                fs.readFile(path, 'utf8', function (err, data) {
+                    if (err) {
+                        console.log(err);
+                        return next();
+                    }
+                    else {
+                        var similarArtists = JSON.parse(data);
+
+                        hasonlolista[most.name] = {};
+                        hasonlolista[most.name].similarArtist = [];
+                        hasonlolista[most.name].group = group;
+                        similarArtists.forEach(function (item) {
+                            nextmit.push(item);
+                            hasonlolista[most.name].similarArtist.push(item);
+                        });
+
+                        return getNextItem(finalcb);
+                    }
                 });
-                /*
-                 var JSONObject = JSON.stringify(hasonlolista[most.name].similarArtist);
 
-                 fs.writeFile('./cache/' + most.name + '_' + limit + '.json', JSONObject, function (err) {
-                 if (err) {
-                 console.log(err);
-                 return next();
-                 }
-                 */
-                return getNextItem(finalcb);
-            });
+            } catch (e) {
+                // It isn't accessible
+                console.log("No cache");
+                lfm.artist.getSimilar({
+                    'artist': most.name,
+                    'limit': limit
+
+                }, function (err, similarArtists) {
+                    if (err) {
+                        return console.log('We\'re in trouble', err);
+                    }
+
+                    hasonlolista[most.name] = {};
+                    hasonlolista[most.name].similarArtist = [];
+                    hasonlolista[most.name].group = group;
+                    similarArtists.artist.forEach(function (item) {
+                        nextmit.push(item);
+                        //console.log(item);
+                        hasonlolista[most.name].similarArtist.push(item);
+                    });
+
+                    var JSONObject = JSON.stringify(hasonlolista[most.name].similarArtist);
+
+                    fs.writeFile(path, JSONObject, function (err) {
+                        if (err) {
+                            console.log(err);
+                            return next();
+                        }
+
+                        return getNextItem(finalcb);
+                    });
+                });
+            }
         }
 
         function goDeep(cb) {
@@ -104,16 +137,17 @@ module.exports = function () {
                 });
 
                 hasonlolista[item].similarArtist.forEach(function (itemList) {
-                    if (alreadyProcessedNames.indexOf(itemList) != -1) {
+                    if (alreadyProcessedNames.indexOf(itemList.name) != -1) {
                         similarArtistList.links.push({
                             "source": item,
-                            "target": itemList,
+                            "target": itemList.name,
                             "value": 3
                         });
                     }
                 });
             }
 
+            //console.log(similarArtistList);
             res.tpl.similarArtistsList = JSON.stringify(similarArtistList);
 
             return next();

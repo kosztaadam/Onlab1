@@ -50,3 +50,5 @@ Temporary Items
 node_modules
 .idea/
 last fm api info.txt
+middleware/getSimilar próbálkozások/
+cache/

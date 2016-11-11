@@ -1,0 +1,335 @@
+<% include header %>
+
+<div class="container">
+
+    <div class="page-header">
+        <h1><%= artist %></h1>
+    </div>
+
+    <div class="table">
+        <table>
+            <tbody>
+            <tr>
+                <td><img src="<%= artistImage %>"></td>
+                <td>
+                    <ul>
+                        <li><b>Top album:</b> <%= artistTopAlbum %></li>
+                        <li><b>Listeners:</b> <%= artistListeners %></li>
+                        <li><b>Play count:</b> <%= artistPlayCount %></li>
+                        <li><b>Top tracks:</b></li>
+                        <ul>
+                            <% artistTopTracks.forEach(function(item){ %>
+                            <li><%= item.name %></li>
+                            <% }) %>
+                        </ul>
+                        <li><b>Similar artists:</b></li>
+                    </ul>
+                </td>
+                <td>
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="page-header">
+        <h2>Similar artists graph</h2>
+    </div>
+
+    <div id="similarArtist">
+        <style>
+            .link {
+                stroke: #2E2E2E;
+                stroke-width: 1px;
+            }
+
+            .node {
+                stroke: #fff;
+                stroke-width: 2px;
+            }
+
+            .textClass {
+                stroke: #323232;
+                font-family: "Lucida Grande", "Droid Sans", Arial, Helvetica, sans-serif;
+                font-weight: normal;
+                stroke-width: .5;
+                font-size: 11px;
+            }
+        </style>
+
+        <script>
+            var fisheye = d3.fisheye.circular()
+                    .radius(200)
+                    .distortion(2);
+
+            var graph;
+            function myGraph() {
+
+                // Add and remove elements on the graph object
+                this.addNode = function (id, group) {
+                    nodes.push({
+                        "id": id,
+                        "group": group
+                    });
+                    update();
+                };
+
+                this.removeNode = function (id) {
+                    var i = 0;
+                    var n = findNode(id);
+                    while (i < links.length) {
+                        if ((links[i]['source'] == n) || (links[i]['target'] == n)) {
+                            links.splice(i, 1);
+                        }
+                        else i++;
+                    }
+                    nodes.splice(findNodeIndex(id), 1);
+                    update();
+                };
+
+                this.removeLink = function (source, target) {
+                    for (var i = 0; i < links.length; i++) {
+                        if (links[i].source.id == source && links[i].target.id == target) {
+                            links.splice(i, 1);
+                            break;
+                        }
+                    }
+                    update();
+                };
+
+                this.removeallLinks = function () {
+                    links.splice(0, links.length);
+                    update();
+                };
+
+                this.removeAllNodes = function () {
+                    nodes.splice(0, links.length);
+                    update();
+                };
+
+                this.addLink = function (source, target) {
+                    var value = findNode(source).group;
+                    if(value == 0)
+                        value = 40;
+                    if(value == 1)
+                        value = 20;
+                    if(value == 2)
+                        value = 10;
+                    if(value == 3)
+                        value = 10;
+
+                    links.push({"source": findNode(source), "target": findNode(target), "value":  value});
+                    update();
+                };
+
+                var findNode = function (id) {
+                    for (var i in nodes) {
+                        if (nodes[i]["id"] === id) return nodes[i];
+                    }
+                };
+
+                var findNodeIndex = function (id) {
+                    for (var i = 0; i < nodes.length; i++) {
+                        if (nodes[i].id == id) {
+                            return i;
+                        }
+                    }
+                };
+
+                // set up the D3 visualisation in the specified element
+                var w = 960, h = 800;
+
+                var color = d3.scale.category10();
+
+                var vis = d3.select("div")
+                        .append("svg:svg")
+                        .attr("width", w)
+                        .attr("height", h)
+                        .attr("id", "svg")
+                        .attr("pointer-events", "all")
+                        .attr("viewBox", "0 0 " + w + " " + h)
+                        .attr("perserveAspectRatio", "xMinYMid")
+                        .append('svg:g');
+
+
+                var force = d3.layout.force();
+
+
+
+                var nodes = force.nodes(),
+                        links = force.links();
+
+                var update = function () {
+                    var link = vis.selectAll("line")
+                            .data(links, function (d) {
+                                return d.source.id + "-" + d.target.id;
+                            });
+
+                    link.enter().append("line")
+                            .attr("id", function (d) {
+                                return d.source.id + "-" + d.target.id;
+                            })
+                            .attr("stroke-width", function (d) {
+                                return d.value / 10;
+                            })
+                            .attr("class", "link");
+                    link.append("title")
+                            .text(function (d) {
+                                return d.value;
+                            });
+                    link.exit().remove();
+
+                    var node = vis.selectAll("g.node")
+                            .data(nodes, function (d) {
+                                return d.id;
+                            });
+
+                    var nodeEnter = node.enter().append("g")
+                            .attr("class", "node")
+                            .call(force.drag);
+
+                    nodeEnter.append("svg:circle")
+                            .attr("r", function (d) {
+                                return 20 - (d.group * 7);
+                            })
+                            .attr("id", function (d) {
+                                return "Node;" + d.id;
+                            })
+                            .attr("class", "nodeStrokeClass")
+                            .attr("fill", function (d) {
+                                return color(d.group);
+                            });
+
+                    node.append("title")
+                            .text(function (d) {
+                                return d.id;
+                            });
+
+                    node.exit().remove();
+
+                    force.on("tick", function () {
+
+                        node.attr("transform", function (d) {
+                                    return "translate(" + d.x + "," + d.y + ")";
+                                })
+                                .attr("cx", function (d) {
+                                    return d.x;
+                                })
+                                .attr("cy", function (d) {
+                                    return d.y;
+                                });
+
+
+                        link.attr("x1", function (d) {
+                                    return d.source.x;
+                                })
+                                .attr("y1", function (d) {
+                                    return d.source.y;
+                                })
+                                .attr("x2", function (d) {
+                                    return d.target.x;
+                                })
+                                .attr("y2", function (d) {
+                                    return d.target.y;
+                                });
+                    });
+
+                    // Restart the force layout.
+                    force
+                            .gravity(.01)
+                            .charge(-240)
+                            .friction(0)
+                            .linkDistance(function (d) {
+                                return d.value * 10
+                            })
+                            .size([w, h])
+                            .start();
+
+                    d3.select("svg").on("mousemove", function() {
+                        fisheye.focus(d3.mouse(this));
+
+                        node.each(function(d) { d.fisheye = fisheye(d); })
+                                .attr("cx", function(d) { return d.fisheye.x; })
+                                .attr("cy", function(d) { return d.fisheye.y; })
+                                .attr("r", function(d) { return d.fisheye.z * 4.5; })
+
+                        link.attr("x1", function(d) { return d.source.fisheye.x; })
+                                .attr("y1", function(d) { return d.source.fisheye.y; })
+                                .attr("x2", function(d) { return d.target.fisheye.x; })
+                                .attr("y2", function(d) { return d.target.fisheye.y; });
+
+                    });
+                };
+
+                // Make it all go
+                update();
+            }
+
+            function drawGraph() {
+
+                graph = new myGraph("#svgdiv");
+
+                var simart = <%- JSON.stringify(similarArtistsList) %>
+                        simart = JSON.parse(simart);
+
+                for (var i= 0; i < simart.nodes.length; i++) {
+                    graph.addNode(simart.nodes[i].id, simart.nodes[i].group);
+                }
+
+                for (var j = 0; j < simart.links.length; j++) {
+                    (function(j){
+
+                        setTimeout(function() {
+                            graph.addLink(simart.links[j].source, simart.links[j].target);
+                            //keepNodesOnTop();
+                        }, j * 50);
+
+                    })(j);
+                }
+            }
+
+                drawGraph();
+
+                // because of the way the network is created, nodes are created first, and links second,
+                // so the lines were on top of the nodes, this just reorders the DOM to put the svg:g on top
+                function keepNodesOnTop() {
+                    $(".nodeStrokeClass").each(function (index) {
+                        var gnode = this.parentNode;
+                        gnode.parentNode.appendChild(gnode);
+                    });
+                }
+
+                function addNodes() {
+                    d3.select("svg")
+                            .remove();
+                    drawGraph();
+                }
+
+        </script>
+
+
+    </div>
+
+
+    <div class="container">
+
+        <div class="page-header">
+            <h2>Search</h2>
+        </div>
+
+        <form class="form-inline">
+            <form method="post">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="artistid" id="artistid" size="40">
+                </div>
+                <div class="form-group">
+                    <button type="submit" formmethod="post" class="btn btn-default">Search</button>
+                </div>
+            </form>
+        </form>
+        <br>
+
+    </div>
+
+<% include footer %>
