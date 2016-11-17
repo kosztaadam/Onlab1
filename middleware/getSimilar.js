@@ -146,6 +146,14 @@ module.exports = function () {
                     }
                 });
             }
+            res.tpl.similarArtist = [];
+
+            for (var item in hasonlolista) {
+                if(hasonlolista[item].group == 1) {
+                    console.log(item);
+                    res.tpl.similarArtist.push(item);
+                }
+            }
 
             //console.log(similarArtistList);
             res.tpl.similarArtistsList = JSON.stringify(similarArtistList);

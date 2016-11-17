@@ -17,8 +17,7 @@ app.use(function (req, res, next) {
     return next();
 });
 
-require('./routes/artistList')(app);
-require('./routes/sigma')(app);
+//require('./routes/artistList')(app);
 require('./routes/graph')(app);
 
 app.use(function (err, req, res, next) {

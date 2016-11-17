@@ -18,7 +18,7 @@ module.exports = function(app) {
      * Graf rajzolas
      */
 
-    app.get('/graph',
+    app.get('/',
         authMW(),
         getParametersMW(),
 		getArtistInfoMW(),
@@ -45,5 +45,19 @@ module.exports = function(app) {
         getSimilarMW(),
         renderMW('graph')
     );
+
+    app.get('/artist/:artist', function(req, res, next) {
+            res.tpl.artist = req.params.artist;
+            return next();
+        },
+        authMW(),
+        getParametersMW(),
+        getArtistInfoMW(),
+        getTopAlbumMW(),
+        getTopTracksMW(),
+        getSimilarMW(),
+        renderMW('graph')
+    );
+
 
 };
