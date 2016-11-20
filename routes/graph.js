@@ -20,6 +20,10 @@ module.exports = function(app) {
 
     app.get('/',
         authMW(),
+        function (req, res, next) {
+            console.log("get sima");
+            return next();
+        },
         getParametersMW(),
 		getArtistInfoMW(),
         getTopAlbumMW(),
@@ -28,13 +32,26 @@ module.exports = function(app) {
         renderMW('graph')
     );
 
-    app.post('/graph/:artistid', function (req, res, next) {
-        console.log("Post artist: " + req.body.artistid);
-        return res.redirect('/graph/' + req.body.artistid);
-    });
+    app.post('/:artist', function (req, res, next) {
+        console.log("Post artist: " + req.body.artist);
+        console.log("Post limit: " + req.body.limit);
+        console.log("Post deep: " + req.body.deep);
+            res.tpl.artist = req.body.artist;
+            res.tpl.limit = req.body.limit;
+            res.tpl.deep = req.body.deep;
+            return res.redirect('/artist/' + req.body.artist + '/' + req.body.limit + '/' + req.body.deep);
+        }
+        //return res.redirect('/' + req.body.artist);
+    );
 
-    app.get('/graph/:artist', function(req, res, next) {
+    app.get('/artist/:artist/:limit/:deep', function(req, res, next) {
             res.tpl.artist = req.params.artist;
+            res.tpl.limit = req.params.limit;
+            res.tpl.deep = req.params.deep;
+            return next();
+        },
+        function (req, res, next) {
+            console.log("artist");
             return next();
         },
         authMW(),
@@ -45,6 +62,13 @@ module.exports = function(app) {
         getSimilarMW(),
         renderMW('graph')
     );
+
+
+/*
+     app.post('/graph/:artistid', function (req, res, next) {
+         console.log("Post artist: " + req.body.artistid);
+         return res.redirect('/' + req.body.artistid);
+     });
 
     app.get('/artist/:artist', function(req, res, next) {
             res.tpl.artist = req.params.artist;
@@ -59,5 +83,17 @@ module.exports = function(app) {
         renderMW('graph')
     );
 
-
+    app.get('/graph/:artist', function(req, res, next) {
+            res.tpl.artist = req.params.artist;
+            return next();
+        },
+        authMW(),
+        getParametersMW(),
+        getArtistInfoMW(),
+        getTopAlbumMW(),
+        getTopTracksMW(),
+        getSimilarMW(),
+        renderMW('graph')
+    );
+*/
 };

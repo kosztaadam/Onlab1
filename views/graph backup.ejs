@@ -19,10 +19,10 @@
                     <button type="submit" formmethod="post" class="btn btn-default">Search</button>
                 </div>
             </div>
-            <div class="col-sm-2">
+            <div class="col-sm-4">
                 <div class="form-group">
                     <label for="limit">Similar artist limit:</label>
-                    <select class="form-control" id="limit" name="limit" style="max-width:40%">
+                    <select class="form-control" id="limit" name="limit">
                         <option>1</option>
                         <option>2</option>
                         <option>3</option>
@@ -31,10 +31,10 @@
                 </div>
             </div>
 
-            <div class="col-sm-2">
+            <div class="col-sm-4">
                 <div class="form-group">
                     <label for="deep">Deep of similar artist:</label>
-                    <select class="form-control" id="deep" name="deep" style="max-width:40%">
+                    <select class="form-control" id="deep" name="deep">
                         <option>1</option>
                         <option>2</option>
                         <option>3</option>
@@ -103,29 +103,17 @@
                     }
 
                     .nodes circle {
-                        stroke: #999;
-                        stroke-width: 0.5px;
-                    }
-
-                    .node circle {
-                        cursor: pointer;
-                        stroke: #3182bd;
+                        stroke: #fff;
                         stroke-width: 1.5px;
                     }
 
-                    .node text {
-                        font: 10px sans-serif;
-                        pointer-events: none;
-                        /*text-anchor: middle;*/
-                    }
-
                 </style>
-                <svg width="500" height="500"></svg>
+                <svg width="500" height="300"></svg>
 
                 <script src="/js/renderGraph.js"></script>
                 <script type="text/javascript">
                     var simart = <%- JSON.stringify(similarArtistsList) %>;
-                    renderGraph(simart, false, false);
+                    renderGraph(simart, false);
                 </script>
 
             </div>
@@ -138,38 +126,42 @@
         <div class="page-header"></div>
         <h4>Graph options</h4>
 
-        <div class="col-sm-3">
-            <label for="fisheye_effect">Fisheye effect:</label>
-            <input id="fisheye_effect" type="checkbox" data-toggle="toggle">
-        </div>
+        <input id="fisheye_effect" class="btn btn-info" name="fisheye_effect" type="button" value="Fisheye effect start" />
 
-        <div class="col-sm-3">
-            <label for="highlight_effect">Highlight effect:</label>
-            <input id="highlight_effect" type="checkbox" data-toggle="toggle">
-        </div>
+        <input id="highlight" class="btn btn-primary" name="highlight" type="button" value="Highlight effect start" />
 
-        <script>
-            $(function() {
-                $('#fisheye_effect').change(function() {
-                    if ($(this).prop('checked')) {
-                        $('#highlight_effect').prop('checked', false).change();
-                        renderGraph(simart, true, false);
-                    }
-                    else
-                        renderGraph(simart, false, false);
-                })
-            })
+        <script type="text/javascript">
 
-            $(function() {
-                $('#highlight_effect').change(function() {
-                    if ($(this).prop('checked')) {
-                       $('#fisheye_effect').prop('checked', false).change();
-                        renderGraph(simart, false, true);
-                    }
-                    else
-                        renderGraph(simart, false, false);
-                })
-            })
+            var fisheyeOnOff = d3.select("#fisheye_effect");
+
+            var fisheye_enable = true;
+
+            fisheyeOnOff.on("click", function () {
+                if (fisheye_enable) {
+                    this.value = 'Fisheye effect stop';
+                    renderGraph(simart, fisheye_enable);
+                }
+                else {
+                    this.value = 'Fisheye effect start';
+                    renderGraph(simart, fisheye_enable);
+                }
+                fisheye_enable = !fisheye_enable;
+            });
+
+            var highlightOnOff = d3.select("#highlight");
+            var highlight_enable = false;
+
+            highlightOnOff.on("click", function () {
+                if (highlight_enable) {
+                    this.value = 'Highlight effect start';
+                    renderGraph(simart, false);
+                }
+                else {
+                    this.value = 'Highlight effect stop';
+                    renderHightlihtedGraph(simart, highlight_enable);
+                }
+                highlight_enable = !highlight_enable;
+            });
 
         </script>
 

@@ -13,15 +13,29 @@ module.exports = function () {
             return next();
         }
 
+        var deep;
+
+        if (typeof res.tpl.deep == 'undefined')
+            deep = 2;
+        else
+            deep = res.tpl.deep;
+
+        var limit;
+
+        if (typeof res.tpl.limit == 'undefined')
+            limit = 2;
+        else
+            limit = res.tpl.limit;
+
+
         var lfm = res.tpl.lfm;
 
         var mit = [];
         var nextmit = [];
-        var deep = 2;
         var alreadyProcessedNames = [];
         var hasonlolista = [];
         var group = 0;
-        var limit = 5;
+
 
         mit.push(res.tpl.artistInfo);
 

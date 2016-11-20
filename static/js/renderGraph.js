@@ -1,15 +1,13 @@
-function renderGraph(simart, enable) {
+function renderGraph(simart, fisheyeEnable, highlightEnable) {
 
-    var fisheye = d3.fisheye.circular()
-        .radius(100)
-        .distortion(2);
-
+    //set graph size and color
     var svg = d3.select("svg"),
         width = +svg.attr("width"),
         height = +svg.attr("height");
 
     var color = d3.scaleOrdinal(d3.schemeCategory20);
 
+    //parse graph
     graph = JSON.parse(simart);
 
     var simulation = d3.forceSimulation()
@@ -19,11 +17,48 @@ function renderGraph(simart, enable) {
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
 
+    var findNeighborNodes = function(id) {
+        var neighborNodes = [];
+        for (var i in graph.nodes) {
+            if (graph.nodes[i]["group"]+1 == id.group)
+                neighborNodes.push(graph.nodes[i]);
+        }
+        return neighborNodes;
+    };
+
+    var findNode = function (id) {
+        for (var i in graph.nodes) {
+            if (graph.nodes[i]["id"] === id) return graph.nodes[i];
+        }
+    };
+
+    var findLink = function (id) {
+        var neighborNodes = [];
+        var nodeId;
+        for (var i in graph.links) {
+            if (graph.links[i]["source"] == id) {
+                nodeId = graph.links[i]["target"];
+                if (neighborNodes.indexOf(nodeId) == -1)
+                    neighborNodes.push(findNode(nodeId.id));
+            } else if(graph.links[i]["target"] == id) {
+                nodeId = graph.links[i]["source"];
+                if (neighborNodes.indexOf(nodeId) == -1)
+                    neighborNodes.push(findNode(nodeId.id));
+            }
+        }
+        //console.log(neighborNodes);
+        return neighborNodes;
+    };
+
+    //update
     var update = function () {
 
+        //delete previous links & nodes
+        svg.selectAll("g.nodes").remove();
         svg.selectAll("g.links").remove();
-        svg.selectAll("g.nodes").remove()
+        svg.selectAll("g.node").remove();
 
+        //set links
         var link = svg.append("g")
             .attr("class", "links")
             .selectAll("line")
@@ -33,24 +68,69 @@ function renderGraph(simart, enable) {
                 return Math.sqrt(d.value);
             });
 
-        var node = svg.append("g")
-            .attr("class", "nodes")
-            .selectAll("circle")
-            .data(graph.nodes)
-            .enter().append("circle")
-            .attr("r", 5)
-            .attr("fill", function (d) {
-                return color(d.group);
-            })
-            .call(d3.drag()
-                .on("start", dragstarted)
-                .on("drag", dragged)
-                .on("end", dragended));
+        //set fisheye effect if fisheye enabled
+        if (fisheyeEnable) {
+            var fisheye = d3.fisheye.circular()
+                .radius(100)
+                .distortion(2);
+        }
 
-        node.append("title")
-            .text(function (d) {
-                return d.id;
-            });
+        var node;
+
+        //set nodes
+        if (fisheyeEnable) {
+            node = svg.append("g")
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(graph.nodes)
+                .enter().append("circle")
+                .attr("r", 6)
+                .attr("fill", function (d) {
+                    return color(d.group);
+                })
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            node.append("title")
+                .text(function (d) {
+                    return d.id;
+                });
+        }
+        else {
+            node = svg.selectAll(".node")
+                .data(graph.nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            node.append("circle")
+                .attr("r", 6)
+                .attr("fill", function (d) {
+                    return color(d.group);
+                });
+
+            node.append("title")
+                .text(function (d) {
+                    return d.id;
+                });
+
+            node.append("text")
+                .attr("dx", function (d) {
+                    if (d.id.length < 5)
+                        return d.id.length * 3;
+                    else
+                        return d.id.length;
+                })
+                .attr("dy", ".35em")
+                .text(function (d) {
+                    return d.id
+                });
+        }
 
         function ticked() {
             link
@@ -66,14 +146,22 @@ function renderGraph(simart, enable) {
                 .attr("y2", function (d) {
                     return d.target.y;
                 });
+            if (fisheyeEnable) {
+                node
+                    .attr("cx", function (d) {
+                        return d.x;
+                    })
+                    .attr("cy", function (d) {
+                        return d.y;
+                    });
+            }
+            else {
+                node
+                    .attr("transform", function (d) {
+                        return "translate(" + d.x + "," + d.y + ")"
+                    });
+            }
 
-            node
-                .attr("cx", function (d) {
-                    return d.x;
-                })
-                .attr("cy", function (d) {
-                    return d.y;
-                });
         }
 
         simulation
@@ -83,43 +171,91 @@ function renderGraph(simart, enable) {
         simulation.force("link")
             .links(graph.links);
 
-        d3.select("svg").on("mousemove", function () {
+        //mouseover different in fisheye and highlight effect
+        if (highlightEnable) {
+            node.on("mouseover", function (d) {
+                link.style('stroke-width', function (l) {
+                    if (d === l.source || d === l.target)
+                        return 3;
+                    else
+                        return 2;
+                });
+                link.style('stroke', function (l) {
+                    if (d === l.source || d === l.target)
+                        return "#000";
+                    else
+                        return "#999";
+                });
+                node.select("circle").style('r', function (a) {
+                    if (d == a) {
+                        return 12;
+                    }
+                    else {
+                        var neighborNodes = findLink(d);
+                        for (var i in neighborNodes) {
+                            if (a.id == neighborNodes[i].id) {
+                                return 10;
+                            }
+                        }
+                        return 6;
+                    }
+                });
+                node.style('stroke-width', function (l) {
+                    if (d == l) {
+                        return 2;
+                    }
+                    else
+                        return 0;
+                });
+                node.select("text").style('font-weight',function (l) {
+                    if (d == l) {
+                        return 'bold';
+                    }
+                    else
+                        return 'normal';
+                });
+            });
+        }
 
-            if(enable)
+        if (fisheyeEnable) {
+
+            d3.select("svg").on("mousemove", function () {
+
                 fisheye.focus(d3.mouse(this));
 
-            node.each(function (d) {
-                    d.fisheye = fisheye(d);
-                })
-                .attr("cx", function (d) {
-                    return d.fisheye.x;
-                })
-                .attr("cy", function (d) {
-                    return d.fisheye.y;
-                })
-                .attr("r", function (d) {
-                    return d.fisheye.z * 4.5;
-                });
+                node.each(function (d) {
+                        d.fisheye = fisheye(d);
+                    })
+                    .attr("cx", function (d) {
+                        return d.fisheye.x;
+                    })
+                    .attr("cy", function (d) {
+                        return d.fisheye.y;
+                    })
+                    .attr("r", function (d) {
+                        return d.fisheye.z * 4.5;
+                    });
 
-            link.attr("x1", function (d) {
-                    return d.source.fisheye.x;
-                })
-                .attr("y1", function (d) {
-                    return d.source.fisheye.y;
-                })
-                .attr("x2", function (d) {
-                    return d.target.fisheye.x;
-                })
-                .attr("y2", function (d) {
-                    return d.target.fisheye.y;
-                });
+                link.attr("x1", function (d) {
+                        return d.source.fisheye.x;
+                    })
+                    .attr("y1", function (d) {
+                        return d.source.fisheye.y;
+                    })
+                    .attr("x2", function (d) {
+                        return d.target.fisheye.x;
+                    })
+                    .attr("y2", function (d) {
+                        return d.target.fisheye.y;
+                    });
+            });
+        }
 
-        });
     };
 
     update();
 
-// Add and remove elements on the graph object
+    // Add and remove elements on the graph object
     function addNode(id, group) {
         graph.nodes.push({
             "id": id,
@@ -195,6 +331,7 @@ function renderGraph(simart, enable) {
      })(j);
      }
      */
+
     function dragstarted(d) {
         if (!d3.event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
@@ -215,7 +352,7 @@ function renderGraph(simart, enable) {
 
 }
 
-function renderHightlihtedGraph(simart, enable) {
+function renderHightlihtedGraph(simart) {
 
     var svg = d3.select("svg"),
         width = +svg.attr("width"),
@@ -235,7 +372,7 @@ function renderHightlihtedGraph(simart, enable) {
     var update = function () {
 
         svg.selectAll("g.links").remove();
-        svg.selectAll("g.nodes").remove()
+        svg.selectAll("g.nodes").remove();
 
         var link = svg.append("g")
             .attr("class", "links")
@@ -251,7 +388,7 @@ function renderHightlihtedGraph(simart, enable) {
             .selectAll("circle")
             .data(graph.nodes)
             .enter().append("circle")
-            .attr("r", 5)
+            .attr("r", 6)
             .attr("fill", function (d) {
                 return color(d.group);
             })
@@ -308,7 +445,14 @@ function renderHightlihtedGraph(simart, enable) {
                     return 8;
                 }
                 else
-                    return 5;
+                    return 6;
+            });
+            node.style('stroke-width', function (l) {
+                if (d == l) {
+                    return 2;
+                }
+                else
+                    return 0;
             })
         })
 
@@ -391,7 +535,7 @@ function renderHightlihtedGraph(simart, enable) {
 
      })(j);
      }
-     */
+*/
     function dragstarted(d) {
         if (!d3.event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
