@@ -103,6 +103,11 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
                 .data(graph.nodes)
                 .enter().append("g")
                 .attr("class", "node")
+                .on("click", function (d) {
+                    if (d3.event.ctrlKey) {
+                        location.href = '/artist/' + d.id;
+                    }
+                })
                 .call(d3.drag()
                     .on("start", dragstarted)
                     .on("drag", dragged)
@@ -124,7 +129,7 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
                     if (d.id.length < 5)
                         return d.id.length * 3;
                     else
-                        return d.id.length;
+                        return 10;
                 })
                 .attr("dy", ".35em")
                 .text(function (d) {

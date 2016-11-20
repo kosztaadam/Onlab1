@@ -50,8 +50,17 @@ module.exports = function(app) {
             res.tpl.deep = req.params.deep;
             return next();
         },
-        function (req, res, next) {
-            console.log("artist");
+        authMW(),
+        getParametersMW(),
+        getArtistInfoMW(),
+        getTopAlbumMW(),
+        getTopTracksMW(),
+        getSimilarMW(),
+        renderMW('graph')
+    );
+
+    app.get('/artist/:artist', function(req, res, next) {
+            res.tpl.artist = req.params.artist;
             return next();
         },
         authMW(),
