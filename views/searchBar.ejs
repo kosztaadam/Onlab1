@@ -1,0 +1,60 @@
+<div class="page-header">
+    <h2>Search bar</h2>
+</div>
+
+<div class="row">
+
+    <script>
+        $(document).ready(function () {
+            var $error = $(".alert-danger");
+            $("form input").on("blur", function () {
+                if (!$(this).val()) {
+                    $error.removeClass("hide").text("No value");
+                } else {
+                    $error.addClass("hide");
+                }
+            });
+        });
+    </script>
+
+    <form action="/artist" method="post">
+
+        <div class="col-sm-4">
+            <label for="artist">Artist name:</label>
+            <div class="form-group">
+                <input type="text" class="form-control" name="artist" id="artist" size="25">
+            </div>
+            <div class="errors">
+                <div class="alert alert-danger hide"></div>
+            </div>
+            <div class="form-group">
+                <button type="submit" formmethod="post" class="btn btn-default">Search</button>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="form-group">
+                <label for="limit">Similar artist limit:</label>
+                <select class="form-control" id="limit" name="limit" style="max-width:40%">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-sm-2">
+            <div class="form-group">
+                <label for="deep">Deep of similar artist:</label>
+                <select class="form-control" id="deep" name="deep" style="max-width:40%">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                </select>
+            </div>
+        </div>
+
+    </form>
+
+</div>

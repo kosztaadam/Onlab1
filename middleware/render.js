@@ -6,11 +6,10 @@
 module.exports = function (viewName) {
 
     return function (req, res) {
-       // console.log('Artist: ' +  res.tpl.artist);
-	   
-	   if(viewName == 'graph') {
-		res.tpl.pageTitle = res.tpl.artist;
-		}
+
+        // Set page title
+       res.tpl.pageTitle = res.tpl.artist;
+
        res.render(viewName, res.tpl);
     };
 

@@ -8,8 +8,8 @@
 
 // ** BEGIN EDIT HERE **************************************************
 
-  var LASTFM_API_KEY = '2e48ce2946a976be45b078fa422f1ee0'; // YOUR LASTFM API KEY HERE
-  var LASTFM_API_SECRET = '9192b61f923124596d4314c4eaf51466'; // YOUR LASTFM API SECRET HERE
+  var LASTFM_API_KEY = ''; // YOUR LASTFM API KEY HERE
+  var LASTFM_API_SECRET = ''; // YOUR LASTFM API SECRET HERE
   var DEMO_PORT = 3000;
   var DEMO_URL = 'http://127.0.0.1:' + DEMO_PORT;
 

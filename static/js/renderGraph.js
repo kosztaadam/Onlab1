@@ -17,21 +17,6 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
 
-    var findNeighborNodes = function(id) {
-        var neighborNodes = [];
-        for (var i in graph.nodes) {
-            if (graph.nodes[i]["group"]+1 == id.group)
-                neighborNodes.push(graph.nodes[i]);
-        }
-        return neighborNodes;
-    };
-
-    var findNode = function (id) {
-        for (var i in graph.nodes) {
-            if (graph.nodes[i]["id"] === id) return graph.nodes[i];
-        }
-    };
-
     var findLink = function (id) {
         var neighborNodes = [];
         var nodeId;
@@ -40,7 +25,7 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
                 nodeId = graph.links[i]["target"];
                 if (neighborNodes.indexOf(nodeId) == -1)
                     neighborNodes.push(findNode(nodeId.id));
-            } else if(graph.links[i]["target"] == id) {
+            } else if (graph.links[i]["target"] == id) {
                 nodeId = graph.links[i]["source"];
                 if (neighborNodes.indexOf(nodeId) == -1)
                     neighborNodes.push(findNode(nodeId.id));
@@ -77,65 +62,42 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
 
         var node;
 
-        //set nodes
-        if (fisheyeEnable) {
-            node = svg.append("g")
-                .attr("class", "nodes")
-                .selectAll("circle")
-                .data(graph.nodes)
-                .enter().append("circle")
-                .attr("r", 6)
-                .attr("fill", function (d) {
-                    return color(d.group);
-                })
-                .call(d3.drag()
-                    .on("start", dragstarted)
-                    .on("drag", dragged)
-                    .on("end", dragended));
+        node = svg.selectAll(".node")
+            .data(graph.nodes)
+            .enter().append("g")
+            .attr("class", "node")
+            .on("click", function (d) {
+                if (d3.event.shiftKey) {
+                    location.href = '/artist/' + d.id;
+                }
+            })
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
 
-            node.append("title")
-                .text(function (d) {
-                    return d.id;
-                });
-        }
-        else {
-            node = svg.selectAll(".node")
-                .data(graph.nodes)
-                .enter().append("g")
-                .attr("class", "node")
-                .on("click", function (d) {
-                    if (d3.event.ctrlKey) {
-                        location.href = '/artist/' + d.id;
-                    }
-                })
-                .call(d3.drag()
-                    .on("start", dragstarted)
-                    .on("drag", dragged)
-                    .on("end", dragended));
+        node.append("circle")
+            .attr("r", 6)
+            .attr("fill", function (d) {
+                return color(d.group);
+            });
 
-            node.append("circle")
-                .attr("r", 6)
-                .attr("fill", function (d) {
-                    return color(d.group);
-                });
+        node.append("title")
+            .text(function (d) {
+                return d.id;
+            });
 
-            node.append("title")
-                .text(function (d) {
-                    return d.id;
-                });
-
-            node.append("text")
-                .attr("dx", function (d) {
-                    if (d.id.length < 5)
-                        return d.id.length * 3;
-                    else
-                        return 10;
-                })
-                .attr("dy", ".35em")
-                .text(function (d) {
-                    return d.id
-                });
-        }
+        node.append("text")
+            .attr("dx", function (d) {
+                if (d.id.length < 5)
+                    return d.id.length * 3;
+                else
+                    return 10;
+            })
+            .attr("dy", ".35em")
+            .text(function (d) {
+                return d.id
+            });
 
         function ticked() {
             link
@@ -151,22 +113,10 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
                 .attr("y2", function (d) {
                     return d.target.y;
                 });
-            if (fisheyeEnable) {
-                node
-                    .attr("cx", function (d) {
-                        return d.x;
-                    })
-                    .attr("cy", function (d) {
-                        return d.y;
-                    });
-            }
-            else {
-                node
-                    .attr("transform", function (d) {
-                        return "translate(" + d.x + "," + d.y + ")"
-                    });
-            }
-
+            node
+                .attr("transform", function (d) {
+                    return "translate(" + d.x + "," + d.y + ")"
+                });
         }
 
         simulation
@@ -212,7 +162,7 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
                     else
                         return 0;
                 });
-                node.select("text").style('font-weight',function (l) {
+                node.select("text").style('font-weight', function (l) {
                     if (d == l) {
                         return 'bold';
                     }
@@ -229,21 +179,21 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
                 fisheye.focus(d3.mouse(this));
 
                 node.each(function (d) {
-                        d.fisheye = fisheye(d);
+                    d.fisheye = fisheye(d);
                     })
-                    .attr("cx", function (d) {
-                        return d.fisheye.x;
-                    })
-                    .attr("cy", function (d) {
-                        return d.fisheye.y;
+                    .attr("transform", function (d) {
+                        return "translate(" + d.fisheye.x + "," + d.fisheye.y + ")";
                     })
                     .attr("r", function (d) {
                         return d.fisheye.z * 4.5;
+                    })
+                    .attr("font-weight", function (d) {
+                        return "bold";
                     });
 
                 link.attr("x1", function (d) {
-                        return d.source.fisheye.x;
-                    })
+                    return d.source.fisheye.x;
+                })
                     .attr("y1", function (d) {
                         return d.source.fisheye.y;
                     })
@@ -540,7 +490,7 @@ function renderHightlihtedGraph(simart) {
 
      })(j);
      }
-*/
+     */
     function dragstarted(d) {
         if (!d3.event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;

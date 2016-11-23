@@ -18,19 +18,14 @@ module.exports = function () {
 
         }, function (err, topTracks) {
             if (err) {
-                return console.log('We\'re in trouble', err);
+                return console.log('We\'re in trouble in getTopTracks', err);
             }
-
-            //res.tpl.artistTopTracks = topTracks.track;
-            //console.log(topTracks.track);
 
             for(var i = 0; i < limit; i++) {
                 topTrackLst.push(topTracks.track[i]);
             }
 
             res.tpl.artistTopTracks = topTrackLst;
-
-            //console.log(res.tpl.artistTopTracks);
 
             return next();
         });

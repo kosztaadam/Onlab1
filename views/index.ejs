@@ -1,29 +1,35 @@
 <% include header %>
 
-<h1><%= artist %>:</h1>
-Listener: <%= artistListeners %>
-<br>
-Play count: <%= artistPlayCount %>
-<br>
+<div class="container">
 
-<img src="<%= artistImage %>" >
+    <% include searchbar %>
 
-<br>
-<br>
+    <div class="row">
 
-Kereses:
-<form method = "post">
-	<input type="text" name="artistid" id="artistid" size="40"><br>
-	<input type="submit" id="submit" formmethod="post" value="Submit">
-</form>
-<br>
+        <div class="col-sm-7">
+            <h1><%= artist %></h1>
+        </div>
 
-<ul>
-    <% similarArtistsList.forEach(function(item){ %>
-    <li><a href="/artist/<%= item.name %>"><%= item.name %></a> link: <%= item.url %> </li>
-    <% }) %>
-</ul>
+        <div class="col-sm-5">
+            <h2>Similar artists graph</h2>
+        </div>
+    </div>
 
-<br>
+    <div class="row">
+
+        <div class="col-sm-7">
+            <% include artistInfo %>
+        </div>
+
+        <div class="col-sm-5">
+            <% include artistGraph %>
+        </div>
+    </div>
+
+    <div class="row">
+        <% include graphOptions %>
+    </div>
+
+</div>
 
 <% include footer %>

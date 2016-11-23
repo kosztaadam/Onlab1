@@ -1,0 +1,28 @@
+<div class="table">
+    <table>
+        <tbody>
+        <tr>
+            <td><img src="<%= artistImage %>"></td>
+            <td>
+                <ul>
+                    <li><b>Top album:</b> <%= artistTopAlbum %></li>
+                    <li><b>Listeners:</b> <%= artistListeners %></li>
+                    <li><b>Play count:</b> <%= artistPlayCount %></li>
+                    <li><b>Top tracks:</b></li>
+                    <ul>
+                        <% artistTopTracks.forEach(function(item){ %>
+                        <li><%= item.name %></li>
+                        <% }) %>
+                    </ul>
+                    <li><b>Similar artists:</b></li>
+                    <ul>
+                        <% similarArtist.forEach(function(item){ %>
+                        <li><%= item %></li>
+                        <% }) %>
+                    </ul>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

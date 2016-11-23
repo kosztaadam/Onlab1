@@ -16,11 +16,9 @@ module.exports = function () {
 
         }, function (err, topAlbums) {
             if (err) {
-                return console.log('We\'re in trouble', err);
+                return console.log('We\'re in trouble in getTopAlbum', err);
             }
 
-
-            //console.log(topAlbums.album[0].name);
             res.tpl.artistTopAlbum = topAlbums.album[0].name;
 
             return next();

@@ -9,33 +9,24 @@ module.exports = function () {
 
     return function (req, res, next) {
         if (typeof res.tpl.artistInfo == 'undefined') {
-            console.log("error");
             return next();
         }
 
+        var lfm = res.tpl.lfm;
         var deep;
-
-        if (typeof res.tpl.deep == 'undefined')
-            deep = 2;
-        else
-            deep = res.tpl.deep;
-
         var limit;
 
-        if (typeof res.tpl.limit == 'undefined')
-            limit = 2;
-        else
-            limit = res.tpl.limit;
+        // Alap melyseg 2
+        deep = res.tpl.deep || 3;
 
-
-        var lfm = res.tpl.lfm;
+        // Alap limit 3
+        limit = res.tpl.limit || 2;
 
         var mit = [];
         var nextmit = [];
         var alreadyProcessedNames = [];
         var hasonlolista = [];
         var group = 0;
-
 
         mit.push(res.tpl.artistInfo);
 
@@ -48,7 +39,7 @@ module.exports = function () {
                 return finalcb();
             }
 
-            console.log("most: " + most.name);
+            //console.log("most: " + most.name);
 
             if (alreadyProcessedNames.indexOf(most.name) != -1) {
                 setTimeout(function () {
@@ -64,7 +55,7 @@ module.exports = function () {
             try {
                 fs.accessSync(path, fs.F_OK);
 
-                console.log("cache: " + most.name);
+                //console.log("cache: " + most.name);
 
                 fs.readFile(path, 'utf8', function (err, data) {
                     if (err) {
@@ -88,7 +79,7 @@ module.exports = function () {
 
             } catch (e) {
                 // It isn't accessible
-                console.log("No cache");
+                //console.log("No cache");
                 lfm.artist.getSimilar({
                     'artist': most.name,
                     'limit': limit
@@ -123,7 +114,7 @@ module.exports = function () {
 
         function goDeep(cb) {
             getNextItem(function () {
-                console.log("deep: " + deep);
+                //console.log("deep: " + deep);
                 if (deep > 0) {
                     deep--;
                     mit = nextmit;
@@ -163,7 +154,7 @@ module.exports = function () {
             res.tpl.similarArtist = [];
 
             for (var item in hasonlolista) {
-                if(hasonlolista[item].group == 1) {
+                if (hasonlolista[item].group == 1) {
                     console.log(item);
                     res.tpl.similarArtist.push(item);
                 }
