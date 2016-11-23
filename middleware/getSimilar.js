@@ -16,11 +16,11 @@ module.exports = function () {
         var deep;
         var limit;
 
-        // Alap melyseg 2
-        deep = res.tpl.deep || 3;
+        // Alap melyseg 1
+        deep = res.tpl.deep || 2;
 
         // Alap limit 3
-        limit = res.tpl.limit || 2;
+        limit = res.tpl.limit || 3;
 
         var mit = [];
         var nextmit = [];
@@ -155,7 +155,7 @@ module.exports = function () {
 
             for (var item in hasonlolista) {
                 if (hasonlolista[item].group == 1) {
-                    console.log(item);
+                    //console.log(item);
                     res.tpl.similarArtist.push(item);
                 }
             }

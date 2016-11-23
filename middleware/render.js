@@ -10,7 +10,10 @@ module.exports = function (viewName) {
         // Set page title
        res.tpl.pageTitle = res.tpl.artist;
 
-       res.render(viewName, res.tpl);
+       if(viewName == 'artistGraph')
+           res.json(res.tpl.similarArtistsList);
+       else
+           res.render(viewName, res.tpl);
     };
 
 };

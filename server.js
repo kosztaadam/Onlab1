@@ -19,6 +19,7 @@ app.use(function (req, res, next) {
 
 require('./routes/main')(app);
 require('./routes/artistParams')(app);
+require('./routes/ajaxArtistParams')(app);
 
 app.use(function (err, req, res, next) {
     res.status(500).send('Houston, we have a problem!');

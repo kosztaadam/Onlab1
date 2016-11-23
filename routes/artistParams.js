@@ -35,7 +35,6 @@ module.exports = function (app) {
         }
     );
 
-
     /**
      * Ures eloado post feldolgozasa, majd tovabbitas get-re
      */
