@@ -50,7 +50,15 @@ module.exports = function () {
 
             alreadyProcessedNames.push(most.name);
 
-            var path = './cache/' + most.name + '_' + limit + '.json';
+            var path;
+
+            if(most.name.includes("'") || most.name.includes('"')) {
+                var temp_most_name = most.name.replace("'", "_");
+                temp_most_name = temp_most_name.replace('"', "_");
+                path = './cache/' + temp_most_name + '_' + limit + '.json';
+            }
+            else
+                path = './cache/' + most.name + '_' + limit + '.json';
 
             try {
                 fs.accessSync(path, fs.F_OK);

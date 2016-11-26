@@ -53,7 +53,7 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
             .attr("class", "node")
             .on("click", function (d) {
                 if (d3.event.shiftKey) {
-                    console.log("aa");
+                   // console.log("aa");
                     //location.href = '/artist/' + d.id;
                     $("#artistname").text(d.id);
                     $.get('/html/artist/' + d.id, function(res){
@@ -61,13 +61,13 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
                     });
                     $.get('/json/artist/' + d.id, function(res){
                         var a = JSON.parse(res);
-                        console.log(a.links);
                         for(var item in a.nodes) {
                             if(findNode(a.nodes[item].id) == undefined)
                                 addNode(a.nodes[item].id, a.nodes[item].group + d.group);
                         }
                         for(var item in a.links) {
                             if(findLink(a.links[item].source, a.links[item].target) == undefined)
+                                //console.log("asd");
                                 addLink(a.links[item].source, a.links[item].target);
                         }
 
@@ -282,9 +282,10 @@ function renderGraph(simart, fisheyeEnable, highlightEnable) {
 
     function findLink (source, target) {
         for (var i in graph.links) {
-            if (graph.links[i]["source"] == source) {
-                if (graph.links[i]["target"] == target) {
-                    return graph.links
+            if (graph.links[i]["source"].id == source) {
+                if (graph.links[i]["target"].id == target) {
+                    console.log(graph.links[i]["source"].id);
+                    return graph.links[i];
                 }
             }
         }

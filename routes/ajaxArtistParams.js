@@ -15,6 +15,8 @@ module.exports = function (app) {
 
     app.get('/html/artist/:artist', function (req, res, next) {
             res.tpl.artist = req.params.artist;
+            res.tpl.limit = 3;
+            res.tpl.deep = 1;
             return next();
         },
         authMW(),
@@ -27,6 +29,8 @@ module.exports = function (app) {
 
     app.get('/json/artist/:artist', function (req, res, next) {
             res.tpl.artist = req.params.artist;
+            res.tpl.limit = 3;
+            res.tpl.deep = 1;
             return next();
         },
         authMW(),
